@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOOLKIT 账户</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand-blue: #0b57d0;
+            --error-red: #d93025;
+            --text-main: #202124;
+            --text-sub: #444746;
+            --border-flat: #dadce0;
+            --bg-white: #ffffff;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f1f3f4;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .setup-card {
+            width: 750px;
+            height: 580px;
+            background: var(--bg-white);
+            border: 1px solid var(--border-flat);
+            border-radius: 28px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        @keyframes inputShake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+
+        .loader-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: #e8f0fe;
+            display: none;
+            z-index: 100;
+        }
+
+        .loader-bar {
+            width: 40%;
+            height: 100%;
+            background: var(--brand-blue);
+            animation: loadingMove 1.5s infinite linear;
+        }
+
+        @keyframes loadingMove {
+            from { margin-left: -40%; }
+            to { margin-left: 100%; }
+        }
+
+        .slider-wrapper {
+            display: flex;
+            width: 400%;
+            height: 100%;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .view-section {
+            width: 25%;
+            display: flex;
+            padding: 48px;
+            box-sizing: border-box;
+        }
+
+        .form-section {
+            flex: 1.5;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .side-illustration {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding-left: 40px;
+            text-align: center;
+        }
+
+        .side-illustration img {
+            width: 220px;
+            margin-bottom: 24px;
+            opacity: 0.9;
+        }
+
+        .side-illustration p {
+            font-size: 14px;
+            color: var(--text-sub);
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .brand {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--brand-blue);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 8px;
+        }
+
+        h2 {
+            font-size: 24px;
+            font-weight: 400;
+            margin: 10px 0;
+            color: var(--text-main);
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: var(--text-main);
+            margin-bottom: 24px;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 24px;
+            width: 100%;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 13px 15px;
+            font-size: 16px;
+            border: 1px solid #747775;
+            border-radius: 4px;
+            outline: none;
+            box-sizing: border-box;
+            background: transparent;
+            transition: border-color 0.2s;
+        }
+
+        .input-group label {
+            position: absolute;
+            left: 15px;
+            top: 13px;
+            background: var(--bg-white);
+            padding: 0 4px;
+            color: var(--text-sub);
+            transition: 0.2s;
+            pointer-events: none;
+        }
+
+        .input-group input:focus+label,
+        .input-group input:not(:placeholder-shown)+label {
+            top: -8px;
+            left: 10px;
+            font-size: 12px;
+            color: var(--brand-blue);
+        }
+
+        .input-group input:focus {
+            border: 2px solid var(--brand-blue);
+            padding: 12px 14px;
+        }
+
+        .input-group.has-error input {
+            border-color: var(--error-red) !important;
+            animation: inputShake 0.4s ease-in-out;
+        }
+
+        .input-group.has-error label {
+            color: var(--error-red) !important;
+        }
+
+        .error-msg {
+            color: var(--error-red);
+            font-size: 12px;
+            margin-top: 4px;
+            display: none;
+            position: absolute;
+        }
+
+        .input-group.has-error .error-msg {
+            display: block;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+        }
+
+        .link-btn {
+            background: none;
+            border: none;
+            color: var(--brand-blue);
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 0;
+        }
+
+        .next-btn {
+            background: var(--brand-blue);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .next-btn:hover { background-color: #0842a0; }
+        .next-btn:disabled { background-color: #9fb8e6; cursor: not-allowed; }
+
+        .row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 4px;
+        }
+
+        .flex-grow { flex: 1; }
+
+        .user-chip {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border: 1px solid var(--border-flat);
+            border-radius: 16px;
+            font-size: 14px;
+            margin-bottom: 12px;
+            color: var(--text-main);
+        }
+
+        .social-area {
+            margin-top: 24px;
+            border-top: 1px dashed #eee;
+            padding-top: 20px;
+        }
+
+        .social-btn {
+            width: 100%;
+            height: 40px;
+            border: 1px solid var(--border-flat);
+            background: #fff;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            margin-bottom: 8px;
+            font-size: 14px;
+            transition: background 0.15s;
+        }
+
+        .social-btn:hover { background: #f8f9fa; }
+        .social-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .social-btn img { width: 18px; }
+
+        /* 验证码倒计时按钮 */
+        .resend-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: -12px;
+            margin-bottom: 16px;
+        }
+
+        .resend-btn {
+            background: none;
+            border: none;
+            color: var(--brand-blue);
+            font-size: 13px;
+            cursor: pointer;
+            padding: 0;
+            white-space: nowrap;
+        }
+
+        .resend-btn:disabled { color: #9aa0a6; cursor: not-allowed; }
+
+        /* OAuth 等待遮罩 */
+        .oauth-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.3);
+            z-index: 999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .oauth-overlay.active { display: flex; }
+
+        .oauth-waiting {
+            background: #fff;
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            max-width: 320px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e8f0fe;
+            border-top: 4px solid var(--brand-blue);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @media (max-width: 768px) {
+            .setup-card { width: 100%; height: 100vh; border: none; border-radius: 0; }
+            .side-illustration { display: none; }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- OAuth 等待遮罩 -->
+<div class="oauth-overlay" id="oauthOverlay">
+    <div class="oauth-waiting">
+        <div class="spinner"></div>
+        <p id="oauthMsg" style="color:#444746;margin:0;">正在跳转授权页面...</p>
+        <button class="link-btn" style="margin-top:20px;" onclick="cancelOAuth()">取消</button>
+    </div>
+</div>
+
+<div class="setup-card">
+    <div class="loader-container" id="loader">
+        <div class="loader-bar"></div>
+    </div>
+
+    <div class="slider-wrapper" id="slider">
+
+        <!-- ── 视图 0：输入邮箱 ────────────────────────────────────────── -->
+        <div class="view-section">
+            <div class="form-section">
+                <div class="brand">TOOLKIT</div>
+                <h2>登录</h2>
+                <p class="subtitle">继续前往 TOOLKIT</p>
+                <div class="input-group" id="g-login-email">
+                    <input type="email" id="loginEmail" placeholder=" "
+                        oninput="clearError(this)" onkeydown="if(event.key==='Enter') apiCheckEmail()">
+                    <label>电子邮件</label>
+                    <div class="error-msg" id="login-email-err">请输入有效的电子邮箱</div>
+                </div>
+                <div class="actions">
+                    <button class="link-btn" onclick="navTo(2)">创建账号</button>
+                    <button class="next-btn" onclick="apiCheckEmail()">下一步</button>
+                </div>
+                <div class="social-area">
+                    <button class="social-btn" id="btn-wechat" onclick="openOAuth('wechat')">
+                        <img src="https://upload.wikimedia.org/wikipedia/zh/a/af/WeChat-logo.png">微信登录
+                    </button>
+                    <button class="social-btn" id="btn-google" onclick="openOAuth('google')">
+                        <img src="https://www.google.com/favicon.ico">Google 登录
+                    </button>
+                </div>
+            </div>
+            <div class="side-illustration">
+                <img src="https://ssl.gstatic.com/accounts/signup/glif/account.svg">
+                <p>使用您的 TOOLKIT 账号登录以访问所有功能</p>
+            </div>
+        </div>
+
+        <!-- ── 视图 1：输入密码 ────────────────────────────────────────── -->
+        <div class="view-section">
+            <div class="form-section">
+                <div class="brand">TOOLKIT</div>
+                <div class="user-chip" id="disp-login-email"></div>
+                <h2>输入密码</h2>
+                <p class="subtitle">为了您的安全，请验证身份</p>
+                <div class="input-group" id="g-login-pass">
+                    <input type="password" id="loginPass" placeholder=" "
+                        oninput="clearError(this)" onkeydown="if(event.key==='Enter') apiLogin()">
+                    <label>您的密码</label>
+                    <div class="error-msg" id="login-pass-err">密码错误或不能为空</div>
+                </div>
+                <div class="actions">
+                    <button class="link-btn" onclick="navTo(0)">返回</button>
+                    <button class="next-btn" onclick="apiLogin()">登录</button>
+                </div>
+            </div>
+            <div class="side-illustration">
+                <img src="https://ssl.gstatic.com/accounts/signup/glif/account.svg">
+                <p>您的个人资料在 TOOLKIT 受到严格保护</p>
+            </div>
+        </div>
+
+        <!-- ── 视图 2：填写注册信息 ───────────────────────────────────── -->
+        <div class="view-section">
+            <div class="form-section">
+                <div class="brand">TOOLKIT</div>
+                <h2>创建账号</h2>
+                <div class="row">
+                    <div class="input-group flex-grow" id="g-reg-fname">
+                        <input type="text" id="regFname" placeholder=" " oninput="clearError(this)">
+                        <label>姓氏</label>
+                    </div>
+                    <div class="input-group flex-grow" id="g-reg-lname">
+                        <input type="text" id="regLname" placeholder=" " oninput="clearError(this)">
+                        <label>名字</label>
+                    </div>
+                </div>
+                <div class="input-group" id="g-reg-email">
+                    <input type="email" id="regEmail" placeholder=" " oninput="clearError(this)">
+                    <label>您的电子邮件</label>
+                    <div class="error-msg" id="reg-email-err">请输入有效的邮箱</div>
+                </div>
+                <div class="input-group" id="g-reg-pass">
+                    <input type="password" id="regPass" placeholder=" " oninput="clearError(this)">
+                    <label>设置密码（至少 6 位）</label>
+                    <div class="error-msg">密码至少需要 6 位</div>
+                </div>
+                <div class="actions" style="margin-top: 20px;">
+                    <button class="link-btn" onclick="navTo(0)">改为登录</button>
+                    <button class="next-btn" onclick="apiRegister()">发送验证码</button>
+                </div>
+            </div>
+            <div class="side-illustration">
+                <img src="https://ssl.gstatic.com/accounts/signup/glif/account.svg">
+                <p>加入 TOOLKIT，开启您的高效探索之旅</p>
+            </div>
+        </div>
+
+        <!-- ── 视图 3：邮箱验证码 ─────────────────────────────────────── -->
+        <div class="view-section">
+            <div class="form-section">
+                <div class="brand">TOOLKIT</div>
+                <div class="user-chip" id="disp-reg-email"></div>
+                <h2>邮箱验证</h2>
+                <p class="subtitle">请输入发送至您邮箱的 6 位验证码</p>
+                <div class="input-group" id="g-reg-vcode">
+                    <input type="text" id="regVcode" maxlength="6"
+                        style="text-align: center; letter-spacing: 8px;"
+                        placeholder=" " oninput="clearError(this); autoVerify(this)"
+                        onkeydown="if(event.key==='Enter') apiVerify()">
+                    <label>验证码</label>
+                    <div class="error-msg" id="vcode-err">验证码无效，请重新输入</div>
+                </div>
+                <!-- 重新发送倒计时 -->
+                <div class="resend-row">
+                    <span style="font-size:13px;color:#9aa0a6;">没收到？</span>
+                    <button class="resend-btn" id="resendBtn" onclick="resendOtp()" disabled>
+                        重新发送（<span id="countdown">60</span>s）
+                    </button>
+                </div>
+                <div class="actions">
+                    <button class="link-btn" onclick="navTo(2)">返回修改</button>
+                    <button class="next-btn" id="verifyBtn" onclick="apiVerify()">完成验证</button>
+                </div>
+            </div>
+            <div class="side-illustration">
+                <img src="https://ssl.gstatic.com/accounts/signup/glif/account.svg">
+                <p>验证码有助于我们确保账号属于您本人</p>
+            </div>
+        </div>
+
+    </div><!-- /slider-wrapper -->
+</div><!-- /setup-card -->
+
+<script>
+    const slider  = document.getElementById('slider');
+    const loader  = document.getElementById('loader');
+    const API_BASE = '/api/auth';
+
+    // ── 倒计时状态 ────────────────────────────────────────────────────────────
+    let countdownTimer = null;
+
+    function navTo(idx) {
+        showLoader(600);
+        slider.style.transform = `translateX(-${idx * 25}%)`;
+    }
+
+    function showLoader(ms) {
+        loader.style.display = 'block';
+        setTimeout(() => { loader.style.display = 'none'; }, ms);
+    }
+
+    function triggerError(groupId, msg) {
+        const el = document.getElementById(groupId);
+        el.classList.remove('has-error');
+        void el.offsetWidth; // reflow 触发动画
+        el.classList.add('has-error');
+        if (msg) {
+            const errEl = el.querySelector('.error-msg');
+            if (errEl) errEl.innerText = msg;
+        }
+    }
+
+    function clearError(input) {
+        input.parentElement.classList.remove('has-error');
+    }
+
+    // 输入 6 位后自动提交
+    function autoVerify(input) {
+        if (input.value.replace(/\s/g,'').length === 6) apiVerify();
+    }
+
+    // ── 倒计时 ────────────────────────────────────────────────────────────────
+    function startCountdown(seconds = 60) {
+        const btn  = document.getElementById('resendBtn');
+        const span = document.getElementById('countdown');
+        btn.disabled = true;
+        span.innerText = seconds;
+        clearInterval(countdownTimer);
+        countdownTimer = setInterval(() => {
+            seconds--;
+            span.innerText = seconds;
+            if (seconds <= 0) {
+                clearInterval(countdownTimer);
+                btn.disabled = false;
+                btn.innerText = '重新发送';
+            }
+        }, 1000);
+    }
+
+    async function resendOtp() {
+        const email    = document.getElementById('regEmail').value;
+        const firstName = document.getElementById('regFname').value;
+        const lastName  = document.getElementById('regLname').value;
+        const password  = document.getElementById('regPass').value;
+        showLoader(1000);
+        try {
+            const res = await fetch(`${API_BASE}/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ firstName, lastName, email, password })
+            });
+            const data = await res.json();
+            if (data.success) {
+                startCountdown(60);
+                document.getElementById('regVcode').value = '';
+            } else {
+                alert(data.message || '发送失败，请返回重新填写');
+            }
+        } catch (e) {
+            alert('网络错误，请稍后重试');
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // REST API 调用
+    // ══════════════════════════════════════════════════════════════════════════
+
+    async function apiCheckEmail() {
+        const email = document.getElementById('loginEmail').value.trim();
+        if (!email || !email.includes('@')) {
+            return triggerError('g-login-email', '请输入有效的电子邮箱');
+        }
+        showLoader(1000);
+        try {
+            const res  = await fetch(`${API_BASE}/check-email`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+            const data = await res.json();
+            if (data.exists) {
+                document.getElementById('disp-login-email').innerText = '✉ ' + email;
+                navTo(1);
+                setTimeout(() => document.getElementById('loginPass').focus(), 700);
+            } else {
+                triggerError('g-login-email', '该邮箱尚未注册，请先创建账号');
+            }
+        } catch (e) {
+            triggerError('g-login-email', '无法连接到服务器，请检查网络');
+        }
+    }
+
+    async function apiLogin() {
+        const email    = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPass').value;
+        if (!password) return triggerError('g-login-pass', '密码不能为空');
+
+        showLoader(2000);
+        try {
+            const res  = await fetch(`${API_BASE}/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await res.json();
+            if (data.success) {
+                localStorage.setItem('tk_token', data.token);
+                localStorage.setItem('tk_user',  JSON.stringify(data.user));
+                window.location.href = 'https://toolkit.uno';
+            } else {
+                triggerError('g-login-pass', data.message || '密码错误');
+            }
+        } catch (e) {
+            triggerError('g-login-pass', '无法连接到服务器');
+        }
+    }
+
+    async function apiRegister() {
+        const firstName = document.getElementById('regFname').value.trim();
+        const lastName  = document.getElementById('regLname').value.trim();
+        const email     = document.getElementById('regEmail').value.trim();
+        const password  = document.getElementById('regPass').value;
+
+        if (!firstName) return triggerError('g-reg-fname', '请输入姓氏');
+        if (!lastName)  return triggerError('g-reg-lname', '请输入名字');
+        if (!email || !email.includes('@')) return triggerError('g-reg-email', '请输入有效的邮箱');
+        if (!password || password.length < 6) return triggerError('g-reg-pass', '密码至少需要 6 位');
+
+        showLoader(1500);
+        try {
+            const res  = await fetch(`${API_BASE}/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ firstName, lastName, email, password })
+            });
+            const data = await res.json();
+            if (data.success) {
+                document.getElementById('disp-reg-email').innerText = '✉ ' + email;
+                navTo(3);
+                startCountdown(60);
+                setTimeout(() => document.getElementById('regVcode').focus(), 700);
+            } else {
+                triggerError('g-reg-email', data.message || '注册失败');
+            }
+        } catch (e) {
+            alert('无法连接到后端服务器，请检查服务是否在运行');
+        }
+    }
+
+    async function apiVerify() {
+        const email = document.getElementById('regEmail').value.trim();
+        const otp   = document.getElementById('regVcode').value.replace(/\s/g, '');
+        if (otp.length < 6) return triggerError('g-reg-vcode', '请输入 6 位验证码');
+
+        const btn = document.getElementById('verifyBtn');
+        btn.disabled = true;
+        showLoader(2000);
+        try {
+            const res  = await fetch(`${API_BASE}/verify-otp`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, otp })
+            });
+            const data = await res.json();
+            if (data.success) {
+                localStorage.setItem('tk_token', data.token);
+                localStorage.setItem('tk_user',  JSON.stringify(data.user));
+                clearInterval(countdownTimer);
+                window.location.href = 'https://toolkit.uno';
+            } else {
+                triggerError('g-reg-vcode', data.message || '验证码无效，请重试');
+                btn.disabled = false;
+            }
+        } catch (e) {
+            triggerError('g-reg-vcode', '网络错误，请稍后重试');
+            btn.disabled = false;
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // OAuth 弹窗流程（Google / 微信）
+    // ══════════════════════════════════════════════════════════════════════════
+
+    let oauthPopup    = null;
+    let oauthPollTimer = null;
+
+    function openOAuth(provider) {
+        const url = `${API_BASE}/${provider}/redirect`;
+        const w = 520, h = 620;
+        const left = Math.round(screen.width  / 2 - w / 2);
+        const top  = Math.round(screen.height / 2 - h / 2);
+
+        // 关闭旧弹窗
+        if (oauthPopup && !oauthPopup.closed) oauthPopup.close();
+
+        oauthPopup = window.open(
+            url,
+            `${provider}_oauth`,
+            `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`
+        );
+
+        // 显示等待遮罩
+        const overlay = document.getElementById('oauthOverlay');
+        document.getElementById('oauthMsg').innerText =
+            provider === 'google' ? '正在跳转 Google 授权...' : '正在跳转微信授权...';
+        overlay.classList.add('active');
+
+        // 监听 postMessage（弹窗回调后发送）
+        window.addEventListener('message', onOAuthMessage);
+
+        // 轮询检测弹窗是否被用户手动关闭
+        clearInterval(oauthPollTimer);
+        oauthPollTimer = setInterval(() => {
+            if (oauthPopup && oauthPopup.closed) {
+                clearInterval(oauthPollTimer);
+                window.removeEventListener('message', onOAuthMessage);
+                overlay.classList.remove('active');
+            }
+        }, 500);
+    }
+
+    function onOAuthMessage(event) {
+        // 安全校验：只接受同源或来自弹窗的消息
+        const data = event.data;
+        if (!data || typeof data !== 'object') return;
+
+        if (data.type === 'oauth_success') {
+            clearInterval(oauthPollTimer);
+            window.removeEventListener('message', onOAuthMessage);
+            document.getElementById('oauthOverlay').classList.remove('active');
+
+            if (oauthPopup && !oauthPopup.closed) oauthPopup.close();
+
+            localStorage.setItem('tk_token', data.token);
+            localStorage.setItem('tk_user',  JSON.stringify(data.user));
+            showLoader(1000);
+            setTimeout(() => { window.location.href = 'https://toolkit.uno'; }, 600);
+        }
+
+        if (data.type === 'oauth_error') {
+            clearInterval(oauthPollTimer);
+            window.removeEventListener('message', onOAuthMessage);
+            document.getElementById('oauthOverlay').classList.remove('active');
+            if (oauthPopup && !oauthPopup.closed) oauthPopup.close();
+            alert('授权失败：' + (data.message || '未知错误'));
+        }
+    }
+
+    function cancelOAuth() {
+        clearInterval(oauthPollTimer);
+        window.removeEventListener('message', onOAuthMessage);
+        document.getElementById('oauthOverlay').classList.remove('active');
+        if (oauthPopup && !oauthPopup.closed) oauthPopup.close();
+    }
+</script>
+
+</body>
+</html>
